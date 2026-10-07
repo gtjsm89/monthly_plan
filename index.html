@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>월중 교육 추진 계획</title>
+
+<!-- ============================================================
+     ★ 설정: 여러 컴퓨터(입력용 PC ↔ TV)를 연결하려면 여기에 Supabase 정보를 넣으세요.
+       Supabase 대시보드 → Project Settings → API
+         Project URL     → supabaseUrl
+         anon public key → supabaseAnonKey
+       비워 두면 이 컴퓨터 한 대에서만 저장됩니다.
+     ============================================================ -->
+<script>
+window.PLAN_CONFIG = {
+  supabaseUrl: "",
+  supabaseAnonKey: ""
+};
+</script>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#4f5fae">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Gowun+Dodum&display=swap">
+<style>
+:root{
+  --ground:#e9ecf6; --board:#dfe5f6; --navy:#4f5fae; --navy-ink:#3a4790;
+  --cell:#eef1fb; --line:#9aa6d4; --ink:#1f2433; --muted:#5d6584;
+  --sat-bg:#c9d6f3; --sat-ink:#3c5fc0; --hol-bg:#f1d4d8; --hol-ink:#b23a3f;
+  --today:#f2b632; --panel:#ffffff; --ok:#2f8a57; --err:#b23a3f;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-round:"Gowun Dodum","Noto Sans KR","Malgun Gothic",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:15px}
+button,input,select{font:inherit;color:inherit}
+button,a.btn,a.tb-btn{cursor:pointer;text-decoration:none}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--today);outline-offset:2px}
+
+/* ---------- 화면 (TV) ---------- */
+#display{position:fixed;inset:0;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;transform-origin:center center;display:flex;gap:40px}
+.board{width:1600px;height:900px;background:var(--board);border-radius:14px;box-shadow:0 6px 30px rgba(40,50,100,.18);
+  padding:34px 56px 40px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.bhead{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;height:92px;flex:none}
+.btitle{display:flex;align-items:center;gap:18px;color:var(--navy);flex:1;min-width:0;padding-bottom:10px;border-bottom:4px dotted var(--line)}
+.chev{width:56px;height:56px;border-radius:50%;background:var(--navy);display:grid;place-items:center;flex:none}
+.chev svg{width:26px;height:26px}
+.btitle h1{margin:0;font:900 50px/1.1 var(--f-body);letter-spacing:-1px;white-space:nowrap}
+.school{align-self:flex-start;display:flex;align-items:center;gap:16px;background:var(--navy);color:#fff;
+  height:78px;padding:0 34px 0 70px;margin-right:-56px;margin-top:-34px;clip-path:polygon(0 0,100% 0,100% 100%,52px 100%)}
+.school img{height:56px;width:56px;object-fit:contain;background:#fff;border-radius:50%;padding:3px}
+.school .logo-ph{height:56px;width:56px;border-radius:50%;border:2px dashed rgba(255,255,255,.6)}
+.school span{font:700 40px/1 var(--f-round);letter-spacing:6px;white-space:nowrap}
+.grid{flex:1;display:grid;grid-template-columns:96px 96px 270px 1fr;column-gap:10px;row-gap:6px;margin-top:26px;min-height:0}
+.grid .h{background:var(--navy);color:#fff;font:700 26px/1 var(--f-body);display:grid;place-items:center;border-radius:3px}
+.grid .c{background:var(--cell);border:1.5px solid var(--line);display:flex;align-items:center;font-size:30px;font-weight:500;
+  padding:0 18px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.15}
+.grid .c.n,.grid .c.w,.grid .c.e{justify-content:center;font-weight:700}
+.grid .c.e{font-size:28px}
+.grid .c.a{font-family:var(--f-round);font-weight:400}
+.grid .sat{background:var(--sat-bg);color:var(--sat-ink)}
+.grid .hol{background:var(--hol-bg);color:var(--hol-ink)}
+.grid .today{box-shadow:inset 0 0 0 4px var(--today)}
+.grid .a.long{font-size:26px}
+.grid .a.xlong{font-size:22px;white-space:normal;line-height:1.1}
+#toolbar{position:fixed;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(255,255,255,.95);
+  border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:0 4px 18px rgba(40,50,100,.2);transition:opacity .4s;max-width:calc(100vw - 32px)}
+#toolbar.idle{opacity:0;pointer-events:none}
+.tb-btn{border:1px solid var(--line);background:var(--cell);border-radius:8px;padding:6px 12px;font-weight:500;color:var(--ink)}
+.tb-btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tb-month{font-weight:700;min-width:7.5em;text-align:center;font-variant-numeric:tabular-nums}
+#toolbar select{border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:#fff}
+.notice{position:fixed;left:16px;top:16px;background:#fff3d6;color:#6b4a00;border:1px solid #e5c372;border-radius:8px;padding:8px 12px;font-size:13px;max-width:min(520px,calc(100vw - 32px))}
+
+/* ---------- 입력 ---------- */
+#input{min-height:100%;padding:24px 16px 60px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.topbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.topbar h1{margin:0;font:900 24px/1.2 var(--f-body);color:var(--navy-ink)}
+.status{font-size:13px;color:var(--muted);min-height:1.2em}
+.status.ok{color:var(--ok)} .status.err{color:var(--err)}
+.card{background:var(--panel);border:1px solid #d5dbef;border-radius:12px;padding:18px}
+.card h2{margin:0 0 12px;font:700 16px/1.3 var(--f-body);color:var(--navy-ink)}
+.settings{display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:12px;color:var(--muted)}
+.field input[type=text],.field input[type=password]{border:1px solid #c6cde6;border-radius:8px;padding:8px 10px;width:min(280px,100%)}
+.logo-box{display:flex;align-items:center;gap:12px}
+.logo-prev{width:64px;height:64px;border-radius:50%;background:var(--cell);border:1px dashed var(--line);display:grid;place-items:center;overflow:hidden;font-size:11px;color:var(--muted)}
+.logo-prev img{width:100%;height:100%;object-fit:contain}
+.btn{display:inline-block;border:1px solid #c6cde6;background:#fff;border-radius:8px;padding:8px 14px;font-weight:500;color:var(--ink)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.ghost{background:transparent}
+.monthbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.monthnav{display:flex;align-items:center;gap:8px}
+.monthnav strong{font:700 20px/1 var(--f-body);min-width:8.5em;text-align:center;font-variant-numeric:tabular-nums;color:var(--navy-ink)}
+.tablewrap{overflow-x:auto}
+table.edit{width:100%;border-collapse:collapse;min-width:620px}
+table.edit th{background:var(--navy);color:#fff;font-weight:500;font-size:13px;padding:8px;text-align:left}
+table.edit th:nth-child(1),table.edit th:nth-child(2){text-align:center;width:52px}
+table.edit th:nth-child(3){width:190px}
+table.edit td{border-bottom:1px solid #e3e7f4;padding:4px 6px}
+table.edit td.n,table.edit td.w{text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+table.edit tr.sat td.n,table.edit tr.sat td.w{color:var(--sat-ink)}
+table.edit tr.hol td.n,table.edit tr.hol td.w{color:var(--hol-ink)}
+table.edit tr.sat{background:#f1f5fd} table.edit tr.hol{background:#fcf1f2}
+table.edit tr.half td{border-top:3px solid var(--line)}
+table.edit input{width:100%;border:1px solid transparent;background:transparent;border-radius:6px;padding:7px 8px}
+table.edit input:hover{border-color:#d5dbef}
+table.edit input:focus{border-color:var(--navy);background:#fff;outline:none}
+.hint{font-size:13px;color:var(--muted);line-height:1.6;margin:0}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.pinbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+</style>
+</head>
+<body>
+<!-- 화면 (TV) -->
+<div id="display" hidden>
+  <div id="stage"></div>
+  <div id="toolbar">
+    <button class="tb-btn" id="d-prev" aria-label="이전 달">◀</button>
+    <span class="tb-month" id="d-month"></span>
+    <button class="tb-btn" id="d-next" aria-label="다음 달">▶</button>
+    <button class="tb-btn" id="d-now">이번 달</button>
+    <select id="d-range" aria-label="표시 범위">
+      <option value="auto">자동 (오늘 기준)</option>
+      <option value="a">1일 ~ 15일</option>
+      <option value="b">16일 ~ 말일</option>
+      <option value="both">두 화면 나란히</option>
+    </select>
+    <button class="tb-btn" id="d-full">전체화면</button>
+    <button class="tb-btn primary" id="go-input">내용 입력</button>
+  </div>
+  <div class="notice" id="notice" hidden>Supabase 설정이 비어 있어 이 컴퓨터에 저장된 내용만 보입니다.</div>
+</div>
+
+<!-- 입력 -->
+<div id="input" hidden>
+  <div class="wrap">
+    <div class="topbar">
+      <h1>월중 교육 추진 계획 입력</h1>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <span class="status" id="status"></span>
+        <button class="btn primary" id="go-display">화면 보기</button>
+      </div>
+    </div>
+
+    <section class="card" id="pin-card" hidden>
+      <h2>입력 비밀번호</h2>
+      <div class="pinbar">
+        <div class="field">
+          <label for="pin">관리자가 정한 비밀번호 (이 컴퓨터에 기억됩니다)</label>
+          <input type="password" id="pin" autocomplete="current-password">
+        </div>
+        <button class="btn" id="pin-save">확인</button>
+      </div>
+    </section>
+
+    <p class="hint" id="local-note" hidden>지금은 이 컴퓨터에만 저장되는 모드입니다. 다른 컴퓨터나 TV와 연결하려면 이 파일 맨 위 설정 부분에 Supabase 정보를 넣어 주세요 (사용설명서 참고).</p>
+
+    <section class="card">
+      <h2>학교 정보</h2>
+      <div class="settings">
+        <div class="field">
+          <label for="school-name">학교 이름</label>
+          <input type="text" id="school-name" placeholder="예: 석송초등학교">
+        </div>
+        <div class="logo-box">
+          <div class="logo-prev" id="logo-prev">마크 없음</div>
+          <div class="field">
+            <label for="logo-file">학교 마크 (PNG·JPG, 투명 배경 권장)</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <input type="file" id="logo-file" accept="image/*" hidden>
+              <button class="btn" id="logo-pick">이미지 선택</button>
+              <button class="btn ghost" id="logo-clear">지우기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="monthbar">
+        <div class="monthnav">
+          <button class="btn" id="i-prev" aria-label="이전 달">◀</button>
+          <strong id="i-month"></strong>
+          <button class="btn" id="i-next" aria-label="다음 달">▶</button>
+        </div>
+        <div class="confirm" id="hol-area"></div>
+      </div>
+      <div class="tablewrap">
+        <table class="edit">
+          <thead><tr><th>일</th><th>요일</th><th>공휴일/행사</th><th>교육 활동</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="hint">입력하면 자동으로 저장되고 화면에 바로 반영됩니다. 토요일은 파랑, 일요일과 공휴일 이름을 적은 날은 빨강으로 표시됩니다.</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* 월중 교육 추진 계획 — 화면(display.html)과 입력(input.html)이 함께 쓰는 코드 */
+(function(){
+const WD=["일","월","화","수","목","금","토"];
+const HOLIDAYS={
+ "2026-01-01":"신정","2026-02-16":"설날 연휴","2026-02-17":"설날","2026-02-18":"설날 연휴","2026-03-01":"삼일절","2026-03-02":"대체공휴일",
+ "2026-05-05":"어린이날","2026-05-24":"부처님오신날","2026-05-25":"대체공휴일","2026-06-03":"지방선거일","2026-06-06":"현충일",
+ "2026-08-15":"광복절","2026-08-17":"대체공휴일","2026-09-24":"추석 연휴","2026-09-25":"추석","2026-09-26":"추석 연휴",
+ "2026-10-03":"개천절","2026-10-05":"대체공휴일","2026-10-09":"한글날","2026-12-25":"성탄절",
+ "2027-01-01":"신정","2027-02-06":"설날 연휴","2027-02-07":"설날","2027-02-08":"설날 연휴","2027-02-09":"대체공휴일","2027-03-01":"삼일절",
+ "2027-05-05":"어린이날","2027-05-13":"부처님오신날","2027-06-06":"현충일","2027-08-15":"광복절","2027-08-16":"대체공휴일",
+ "2027-09-14":"추석 연휴","2027-09-15":"추석","2027-09-16":"추석 연휴","2027-10-03":"개천절","2027-10-04":"대체공휴일",
+ "2027-10-09":"한글날","2027-10-11":"대체공휴일","2027-12-25":"성탄절","2027-12-27":"대체공휴일"
+};
+const HOLI_NAMES=new Set(Object.values(HOLIDAYS).concat(["공휴일","임시공휴일","재량휴업일","휴업일","선거일"]));
+
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,"0");
+const key=(y,m)=>`${y}-${pad(m)}`;
+const dim=(y,m)=>new Date(y,m,0).getDate();
+const today=()=>{const d=new Date();return {y:d.getFullYear(),m:d.getMonth()+1,d:d.getDate()}};
+const acadYear=(y,m)=>m>=3?y:y-1;
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* ---------- 저장소: Supabase 또는 이 컴퓨터(localStorage) ---------- */
+const CFG=window.PLAN_CONFIG||{};
+const sb=(CFG.supabaseUrl&&CFG.supabaseAnonKey&&window.supabase)?window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey):null;
+const bc=("BroadcastChannel" in window)?new BroadcastChannel("monthly-plan"):null;
+const watchers={}; // id -> Set(cb)
+
+async function loadDoc(id){
+  if(sb){
+    const {data,error}=await sb.from("plans").select("data").eq("id",id).maybeSingle();
+    if(error) throw error;
+    return data?data.data:null;
+  }
+  try{return JSON.parse(ls.get("mp:"+id)||"null")}catch(e){return null}
+}
+async function saveDoc(id,data){
+  if(sb){
+    const {error}=await sb.rpc("save_plan",{p_id:id,p_data:data,p_pin:ls.get("mp:pin")||""});
+    if(error) throw error;
+  }else{
+    ls.set("mp:"+id,JSON.stringify(data));
+    bc&&bc.postMessage({id});
+  }
+}
+function watchDoc(id,cb,tag){
+  (watchers[id]=watchers[id]||new Map()).set(tag,cb); // 화면/입력마다 콜백 하나씩
+  loadDoc(id).then(cb).catch(()=>cb(undefined));
+}
+async function refresh(id){ try{const d=await loadDoc(id); (watchers[id]||new Map()).forEach(f=>f(d))}catch(e){} }
+if(sb){
+  sb.channel("plans-live").on("postgres_changes",{event:"*",schema:"public",table:"plans"},p=>{
+    const id=(p.new&&p.new.id)||(p.old&&p.old.id); if(id&&watchers[id]) (watchers[id]).forEach(f=>f(p.new?p.new.data:null));
+  }).subscribe();
+  setInterval(()=>Object.keys(watchers).forEach(refresh),60000); // 실시간 연결이 끊겨도 1분마다 새로 읽기
+}else{
+  bc&&(bc.onmessage=e=>refresh(e.data.id));
+  addEventListener("storage",e=>{if(e.key&&e.key.startsWith("mp:"))refresh(e.key.slice(3))});
+}
+
+let config={school:"",logo:""}; const months={}; const dirty={};
+function dayInfo(y,m,d,data){
+  const w=new Date(y,m-1,d).getDay(); const e=(data&&data.h)||"";
+  const hol=w===0||HOLI_NAMES.has(e.trim());
+  return {w,wd:WD[w],e,a:(data&&data.a)||"",cls:hol?"hol":(w===6?"sat":"")};
+}
+
+/* =================== 화면 =================== */
+/* 화면 */
+let renderDisplay=()=>{};
+{
+  let dY,dM; const t0=today();
+  const r=ls.get("mp:range"); if(r) $("d-range").value=r;
+  if(!sb){ $("notice").hidden=false; setTimeout(()=>$("notice").hidden=true,10000) }
+  function setMonth(y,m){dY=y;dM=m;$("d-month").textContent=`${y}년 ${m}월`;
+    const k=key(y,m); watchDoc("month-"+k,d=>{ if(d!==undefined&&!dirty["month-"+k]) months[k]=d||{days:{}}; render() },"d"); render()}
+  watchDoc("config",d=>{ if(d&&!dirty.config) config={school:d.school||"",logo:d.logo||""}; render() },"d");
+  function board(from,to){
+    const t=today(); const data=(months[key(dY,dM)]||{days:{}}).days||{};
+    const b=document.createElement("div");b.className="board";
+    b.innerHTML=`<div class="bhead"><div class="btitle"><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></div><h1></h1></div><div class="school"></div></div>`;
+    b.querySelector("h1").textContent=`${acadYear(dY,dM)}학년도 ${dM}월 중 교육 추진 계획`;
+    const sc=b.querySelector(".school");
+    if(config.logo){const im=document.createElement("img");im.src=config.logo;im.alt="학교 마크";sc.appendChild(im)}
+    else{const ph=document.createElement("div");ph.className="logo-ph";sc.appendChild(ph)}
+    const nm=document.createElement("span");nm.textContent=config.school||"학교 이름";sc.appendChild(nm);
+    const g=document.createElement("div");g.className="grid";g.style.gridTemplateRows=`52px repeat(${to-from+1},1fr)`;
+    ["일","요일","공휴일/행사","교육 활동"].forEach(h=>{const c=document.createElement("div");c.className="h";c.textContent=h;g.appendChild(c)});
+    for(let d=from;d<=to;d++){
+      const inf=dayInfo(dY,dM,d,data[d]); const isT=t.y===dY&&t.m===dM&&t.d===d;
+      [[d,"n"],[inf.wd,"w"],[inf.e,"e"],[inf.a,"a"]].forEach(([txt,c])=>{
+        const el=document.createElement("div");el.className=`c ${c} ${inf.cls}${isT?" today":""}`;el.textContent=txt;
+        if(c==="a"){if(txt.length>58)el.classList.add("xlong");else if(txt.length>46)el.classList.add("long")}
+        g.appendChild(el);
+      });
+    }
+    b.appendChild(g); return b;
+  }
+  function ranges(){
+    const v=$("d-range").value,last=dim(dY,dM);
+    if(v==="a")return[[1,15]]; if(v==="b")return[[16,last]]; if(v==="both")return[[1,15],[16,last]];
+    const t=today(); return [(t.y===dY&&t.m===dM&&t.d>15)?[16,last]:[1,15]];
+  }
+  function render(){ if(dY==null||$("display").hidden)return; const st=$("stage");st.innerHTML="";ranges().forEach(([a,b])=>st.appendChild(board(a,b)));fit() }
+  function fit(){const st=$("stage"),n=st.children.length||1,W=1600*n+40*(n-1),H=900,s=Math.min(innerWidth/W,innerHeight/H)*.97;
+    st.style.width=W+"px";st.style.height=H+"px";st.style.transform=`translate(-50%,-50%) scale(${s})`}
+  addEventListener("resize",fit);
+  let idle; const wake=()=>{$("toolbar").classList.remove("idle");clearTimeout(idle);idle=setTimeout(()=>{if(!$("display").hidden)$("toolbar").classList.add("idle")},4000)};
+  ["mousemove","touchstart","keydown"].forEach(ev=>addEventListener(ev,wake,{passive:true})); wake();
+  $("d-prev").onclick=()=>{let y=dY,m=dM-1;if(m<1){m=12;y--}setMonth(y,m)};
+  $("d-next").onclick=()=>{let y=dY,m=dM+1;if(m>12){m=1;y++}setMonth(y,m)};
+  $("d-now").onclick=()=>{const t=today();setMonth(t.y,t.m)};
+  $("d-range").onchange=()=>{ls.set("mp:range",$("d-range").value);render()};
+  $("d-full").onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch(e){}};
+  let lastDay=t0.d; setInterval(()=>{const t=today();if(t.d!==lastDay){lastDay=t.d;setMonth(t.y,t.m)}},60000);
+  renderDisplay=render;
+  setMonth(t0.y,t0.m);
+}
+
+/* =================== 입력 =================== */
+/* 입력 */
+let renderInputPage=()=>{};
+{
+  let iY,iM; const t0=today(); let busy={};
+  const status=(t,c)=>{const s=$("status");s.textContent=t;s.className="status"+(c?" "+c:"")};
+  function errMsg(e){ return /invalid pin/i.test(e&&e.message||"")?"입력 비밀번호가 맞지 않습니다. 위에서 비밀번호를 다시 넣어 주세요.":"저장하지 못했습니다. 인터넷 연결을 확인해 주세요." }
+
+  if(sb){ $("pin-card").hidden=false; $("pin").value=ls.get("mp:pin")||""; }
+  else { $("local-note").hidden=false; }
+  $("pin-save").onclick=async()=>{
+    ls.set("mp:pin",$("pin").value.trim());
+    try{const {data,error}=await sb.rpc("check_pin",{p_pin:$("pin").value.trim()}); if(error)throw error;
+      status(data?"비밀번호가 확인되었습니다.":"비밀번호가 맞지 않습니다.",data?"ok":"err")}catch(e){status("확인하지 못했습니다. 파일 맨 위 Supabase 설정을 확인해 주세요.","err")}
+  };
+
+  async function flush(id,getData){
+    if(busy[id]){busy[id]="again";return}
+    busy[id]=true;
+    try{await saveDoc(id,getData());status("저장됨","ok")}catch(e){status(errMsg(e),"err")}
+    const again=busy[id]==="again"; busy[id]=false;
+    if(again) flush(id,getData); else dirty[id]=false;
+  }
+  const timers={};
+  function save(id,getData){dirty[id]=true;status("저장 중…");clearTimeout(timers[id]);timers[id]=setTimeout(()=>flush(id,getData),500)}
+
+  watchDoc("config",d=>{ if(d&&!dirty.config){config={school:d.school||"",logo:d.logo||""};
+    if(document.activeElement!==$("school-name"))$("school-name").value=config.school; renderLogo()} },"i");
+  $("school-name").addEventListener("input",e=>{config.school=e.target.value;save("config",()=>config)});
+  $("logo-pick").onclick=()=>$("logo-file").click();
+  $("logo-clear").onclick=()=>{config.logo="";renderLogo();save("config",()=>config)};
+  $("logo-file").onchange=e=>{
+    const f=e.target.files[0]; if(!f)return; const img=new Image(),url=URL.createObjectURL(f);
+    img.onload=()=>{const s=Math.min(1,240/Math.max(img.width,img.height)),c=document.createElement("canvas");
+      c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      config.logo=c.toDataURL("image/png");URL.revokeObjectURL(url);renderLogo();save("config",()=>config)};
+    img.onerror=()=>status("이미지를 읽지 못했습니다. PNG나 JPG 파일을 골라 주세요.","err");
+    img.src=url;e.target.value="";
+  };
+  function renderLogo(){const p=$("logo-prev");p.innerHTML="";if(config.logo){const i=document.createElement("img");i.src=config.logo;i.alt="학교 마크";p.appendChild(i)}else p.textContent="마크 없음"}
+
+  const mid=()=>"month-"+key(iY,iM);
+  function setMonth(y,m){iY=y;iM=m;$("i-month").textContent=`${y}년 ${m}월`;resetHol();
+    const k=key(y,m),id="month-"+k; months[k]=months[k]||{days:{}}; render();
+    watchDoc(id,d=>{ if(d===undefined||dirty[id])return; months[k]=d||{days:{}}; if(key(iY,iM)===k) softRender() },"i");
+  }
+  function softRender(){
+    const a=document.activeElement;
+    if(a&&a.closest&&a.closest("#rows")){const data=months[key(iY,iM)].days||{};
+      document.querySelectorAll("#rows input").forEach(inp=>{if(inp!==a){const x=data[inp.dataset.d];inp.value=(x&&x[inp.dataset.f])||""}});return}
+    render();
+  }
+  function render(){
+    const k=key(iY,iM),data=(months[k].days=months[k].days||{}),tb=$("rows");tb.innerHTML="";
+    for(let d=1;d<=dim(iY,iM);d++){
+      const inf=dayInfo(iY,iM,d,data[d]),tr=document.createElement("tr");tr.className=(inf.cls||"")+(d===16?" half":"");
+      tr.innerHTML=`<td class="n">${d}</td><td class="w">${inf.wd}</td><td><input id="h-${d}" data-d="${d}" data-f="h" aria-label="${d}일 공휴일/행사"></td><td><input id="a-${d}" data-d="${d}" data-f="a" aria-label="${d}일 교육 활동"></td>`;
+      tr.querySelector("[data-f=h]").value=inf.e;tr.querySelector("[data-f=a]").value=inf.a;tb.appendChild(tr);
+    }
+  }
+  $("rows").addEventListener("input",e=>{
+    const inp=e.target;if(!inp.dataset.d)return;const k=key(iY,iM),d=inp.dataset.d,f=inp.dataset.f,days=months[k].days;
+    days[d]=Object.assign({h:"",a:""},days[d]);days[d][f]=inp.value;if(!days[d].h&&!days[d].a)delete days[d];
+    if(f==="h"){const inf=dayInfo(iY,iM,+d,days[d]);inp.closest("tr").className=(inf.cls||"")+(+d===16?" half":"")}
+    save("month-"+k,()=>months[k]); renderDisplay();
+  });
+  $("i-prev").onclick=()=>{let y=iY,m=iM-1;if(m<1){m=12;y--}setMonth(y,m)};
+  $("i-next").onclick=()=>{let y=iY,m=iM+1;if(m>12){m=1;y++}setMonth(y,m)};
+  function resetHol(){$("hol-area").innerHTML='<button class="btn" id="hol-fill">공휴일 자동 채우기</button>';$("hol-fill").onclick=askHol}
+  function askHol(){
+    const k=key(iY,iM),list=Object.keys(HOLIDAYS).filter(x=>x.startsWith(k+"-")),area=$("hol-area");
+    if(!list.length){area.innerHTML="<span>이 달에는 등록된 공휴일 정보가 없습니다.</span>";setTimeout(resetHol,2500);return}
+    area.innerHTML=`<span>${list.length}일의 공휴일/행사 칸을 채울까요? (비어 있는 칸만)</span><button class="btn primary" id="hol-yes">채우기</button><button class="btn ghost" id="hol-no">취소</button>`;
+    $("hol-no").onclick=resetHol;
+    $("hol-yes").onclick=()=>{const days=months[k].days;list.forEach(x=>{const d=String(+x.slice(8));days[d]=Object.assign({h:"",a:""},days[d]);if(!days[d].h)days[d].h=HOLIDAYS[x]});
+      render();save("month-"+k,()=>months[k]);resetHol()};
+  }
+  renderInputPage=()=>{render();$("school-name").value=config.school;renderLogo()};
+  setMonth(t0.y,t0.m);
+}
+
+/* 화면 ↔ 입력 전환 (이 컴퓨터가 마지막에 쓴 화면을 기억) */
+function show(mode){
+  ls.set("mp:mode",mode);
+  $("display").hidden=mode!=="display"; $("input").hidden=mode!=="input";
+  document.title=mode==="display"?"월중 계획 화면":"월중 계획 입력";
+  if(mode==="display") renderDisplay(); else renderInputPage();
+}
+$("go-input").onclick=()=>show("input");
+$("go-display").onclick=()=>show("display");
+addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(h==="input"||h==="display")show(h)});
+{const h=location.hash.slice(1); show(h==="input"||h==="display"?h:(ls.get("mp:mode")||"display"));}
+
+/* 앱 설치(오프라인 캐시) */
+if("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+</script>
+</body>
+</html>
