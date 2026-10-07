@@ -8,14 +8,14 @@
 <!-- ============================================================
      ★ 설정: 여러 컴퓨터(입력용 PC ↔ TV)를 연결하려면 여기에 Supabase 정보를 넣으세요.
        Supabase 대시보드 → Project Settings → API
-         Project URL     → https://bgkjzbhctnsmqdrahbek.supabase.co/rest/v1/
-         anon public key → sb_publishable_PNBMpamsjIZbZdDOnS8DEA__T6dhEcr
+         Project URL     → supabaseUrl
+         anon public key → supabaseAnonKey
        비워 두면 이 컴퓨터 한 대에서만 저장됩니다.
      ============================================================ -->
 <script>
 window.PLAN_CONFIG = {
-  supabaseUrl: "",
-  supabaseAnonKey: ""
+  supabaseUrl: "https://bgkjzbhctnsmqdrahbek.supabase.co/rest/v1/",
+  supabaseAnonKey: "sb_publishable_PNBMpamsjIZbZdDOnS8DEA__T6dhEcr"
 };
 </script>
 
@@ -232,7 +232,25 @@ const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k
 
 /* ---------- 저장소: Supabase 또는 이 컴퓨터(localStorage) ---------- */
 const CFG=window.PLAN_CONFIG||{};
-const sb=(CFG.supabaseUrl&&CFG.supabaseAnonKey&&window.supabase)?window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey):null;
+// 붙여 넣을 때 섞여 들어가기 쉬운 공백·따옴표·/rest/v1 꼬리를 정리
+const SB_URL=String(CFG.supabaseUrl||"").trim().replace(/^["']|["']$/g,"").replace(/\/rest\/v1\/?$/,"").replace(/\/+$/,"");
+const SB_KEY=String(CFG.supabaseAnonKey||"").trim().replace(/^["']|["']$/g,"").replace(/\s+/g,"");
+let sb=null, sbInitError="";
+if(SB_URL&&SB_KEY){
+  if(!window.supabase) sbInitError="Supabase 프로그램을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.";
+  else { try{ sb=window.supabase.createClient(SB_URL,SB_KEY) }catch(e){ sbInitError="supabaseUrl 모양이 올바르지 않습니다. https://○○○.supabase.co 형태인지 확인해 주세요." } }
+}
+/* Supabase 오류를 원인별 안내로 바꾸기 */
+function explainError(e){
+  const m=String((e&&(e.message||e.error_description))||e||""), c=String((e&&e.code)||"");
+  if(/invalid pin/i.test(m)) return "입력 비밀번호가 맞지 않습니다. SQL 2번에 넣은 비밀번호와 같은지 확인해 주세요.";
+  if(c==="PGRST202"||/could not find the function/i.test(m)) return "Supabase에 저장 함수가 없습니다. 지금 키를 복사한 그 프로젝트의 SQL Editor에서 supabase-setup.sql 전체를 다시 Run 해 주세요.";
+  if(c==="PGRST205"||/could not find the table/i.test(m)) return "Supabase에 plans 표가 없습니다. 같은 프로젝트에서 SQL을 다시 Run 해 주세요.";
+  if(/invalid api key|no api key|jwt|unauthorized|401/i.test(m)) return "열쇠(Key)가 맞지 않습니다. Project Settings → API Keys에서 publishable 또는 anon 키를 다시 복사해 주세요.";
+  if(c==="42501"||/permission denied/i.test(m)) return "권한 설정이 빠졌습니다. SQL 전체를 다시 Run 해 주세요.";
+  if(/failed to fetch|networkerror|load failed|fetch/i.test(m)) return "Supabase 주소에 연결하지 못했습니다. supabaseUrl이 https://○○○.supabase.co 형태인지, 인터넷이 되는지 확인해 주세요.";
+  return "Supabase 오류: "+(c?c+" ":"")+m;
+}
 const bc=("BroadcastChannel" in window)?new BroadcastChannel("monthly-plan"):null;
 const watchers={}; // id -> Set(cb)
 
@@ -333,14 +351,18 @@ let renderInputPage=()=>{};
 {
   let iY,iM; const t0=today(); let busy={};
   const status=(t,c)=>{const s=$("status");s.textContent=t;s.className="status"+(c?" "+c:"")};
-  function errMsg(e){ return /invalid pin/i.test(e&&e.message||"")?"입력 비밀번호가 맞지 않습니다. 위에서 비밀번호를 다시 넣어 주세요.":"저장하지 못했습니다. 인터넷 연결을 확인해 주세요." }
+  const errMsg=explainError;
 
-  if(sb){ $("pin-card").hidden=false; $("pin").value=ls.get("mp:pin")||""; }
-  else { $("local-note").hidden=false; }
+  if(sb){ $("pin-card").hidden=false; $("pin").value=ls.get("mp:pin")||"";
+    // 열자마자 연결 상태 점검
+    loadDoc("config").then(d=>status(d?"Supabase에 연결되었습니다.":"Supabase에 연결됐지만 데이터가 없습니다. SQL을 Run 했는지 확인해 주세요.",d?"ok":"err"))
+      .catch(e=>status(explainError(e),"err"));
+  }
+  else { $("local-note").hidden=false; if(sbInitError) status(sbInitError,"err"); }
   $("pin-save").onclick=async()=>{
     ls.set("mp:pin",$("pin").value.trim());
     try{const {data,error}=await sb.rpc("check_pin",{p_pin:$("pin").value.trim()}); if(error)throw error;
-      status(data?"비밀번호가 확인되었습니다.":"비밀번호가 맞지 않습니다.",data?"ok":"err")}catch(e){status("확인하지 못했습니다. 파일 맨 위 Supabase 설정을 확인해 주세요.","err")}
+      status(data?"비밀번호가 확인되었습니다.":"비밀번호가 맞지 않습니다. SQL 2번에 넣은 비밀번호와 같은지 확인해 주세요.",data?"ok":"err")}catch(e){status(explainError(e),"err")}
   };
 
   async function flush(id,getData){
