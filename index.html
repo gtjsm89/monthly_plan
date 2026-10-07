@@ -75,9 +75,19 @@ button,a.btn,a.tb-btn{cursor:pointer;text-decoration:none}
 .grid .evt{background:var(--evt-bg);color:var(--evt-ink)}
 .grid .c.a.evt,.grid .c.a.vac{color:var(--ink)} /* 기간 색칠이 있어도 교육 활동 글씨는 검정 */
 .grid .today{box-shadow:inset 0 0 0 4px var(--today)}
-#toolbar{position:fixed;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(255,255,255,.95);
+#toolbar{position:fixed;z-index:4;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(255,255,255,.95);
   border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:0 4px 18px rgba(40,50,100,.2);transition:opacity .4s;max-width:calc(100vw - 32px)}
 #toolbar.idle{opacity:0;pointer-events:none}
+.edge{position:fixed;top:0;bottom:0;width:11%;z-index:3;border:0;background:transparent;display:flex;align-items:center;padding:0 18px;
+  color:var(--navy);opacity:0;transition:opacity .3s}
+.edge.left{left:0;justify-content:flex-start} .edge.right{right:0;justify-content:flex-end}
+.edge svg{width:56px;height:56px;filter:drop-shadow(0 2px 6px rgba(40,50,100,.3))}
+#display.awake .edge:hover{opacity:.9}
+#display.awake .edge{opacity:.35}
+.edge[hidden]{display:none}
+.rot{display:flex;flex-wrap:wrap;gap:6px}
+.rot button{border:1px solid #e1e5f3;background:#fff;border-radius:8px;padding:6px 10px;font-size:13px}
+.rot button[aria-pressed=true]{border-color:var(--navy);background:var(--cell);font-weight:700}
 .tb-btn{border:1px solid var(--line);background:var(--cell);border-radius:8px;padding:6px 12px;font-weight:500;color:var(--ink)}
 .tb-btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
 .tb-month{font-weight:700;min-width:7.5em;text-align:center;font-variant-numeric:tabular-nums}
@@ -165,12 +175,20 @@ table.sched tr.evt td:first-child{box-shadow:inset 4px 0 #c99a12}
     <button class="tb-btn" id="d-full">전체화면</button>
     <button class="tb-btn primary" id="go-input">내용 입력</button>
   </div>
+  <button class="edge left" id="edge-prev" aria-label="앞 페이지"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" fill="#fff" stroke="none"/><path d="M14 7l-5 5 5 5"/></svg></button>
+  <button class="edge right" id="edge-next" aria-label="다음 페이지"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" fill="#fff" stroke="none"/><path d="M10 7l5 5-5 5"/></svg></button>
   <div class="panel" id="view-panel" hidden>
     <h3>이 창에 보일 내용</h3>
     <label class="opt"><input type="radio" name="range" value="auto"><span>자동<small>오늘이 15일까지면 앞 절반, 16일부터는 뒤 절반</small></span></label>
     <label class="opt"><input type="radio" name="range" value="a"><span>1일 ~ 15일</span></label>
     <label class="opt"><input type="radio" name="range" value="b"><span>16일 ~ 말일</span></label>
     <label class="opt"><input type="radio" name="range" value="both"><span>한 화면에 나란히<small>모니터 하나에 한 달 전체를 작게</small></span></label>
+    <h3>자동 넘김</h3>
+    <div class="rot" id="rot">
+      <button data-sec="0">끄기</button><button data-sec="15">15초</button><button data-sec="30">30초</button><button data-sec="60">1분</button><button data-sec="120">2분</button>
+    </div>
+    <p class="hint">1~15일과 16일~말일을 정해 둔 시간마다 번갈아 보여 줍니다. 모니터 하나로 쓸 때 편해요.</p>
+    <p class="hint"><b>넘기는 방법</b> · 키보드 ←/→, PageUp/PageDown, 스페이스바(발표용 리모컨도 됨) · 화면 왼쪽·오른쪽 끝 클릭. 말일 다음은 다음 달로 넘어갑니다.</p>
     <h3>듀얼 모니터</h3>
     <label class="opt"><input type="radio" name="range" value="span"><span>창 하나를 두 모니터에 걸치기<small>왼쪽 모니터 1~15일, 오른쪽 모니터 16일~말일. 창을 두 모니터 너비로 늘려 쓰세요.</small></span></label>
     <button class="tb-btn primary" id="open-second">두 번째 모니터에 창 열기</button>
@@ -375,7 +393,7 @@ let renderDisplay=()=>{};
   };
   // 두 번째 창: 처음 열리면 전체화면 버튼을 크게 보여 줌
   if(hashRange()&&!document.fullscreenElement){ $("fs-prompt").hidden=false; setTimeout(()=>$("fs-prompt").hidden=true,30000) }
-  $("fs-prompt").onclick=async()=>{ $("fs-prompt").hidden=true; try{await document.documentElement.requestFullscreen()}catch(e){} };
+  $("fs-prompt").onclick=()=>{ $("fs-prompt").hidden=true; toggleFull() };
   if(!sb){ $("notice").hidden=false; setTimeout(()=>$("notice").hidden=true,10000) }
   function setMonth(y,m){dY=y;dM=m;$("d-month").textContent=`${y}년 ${m}월`;
     const k=key(y,m); watchDoc("month-"+k,d=>{ if(d!==undefined&&!dirty["month-"+k]) months[k]=d||{days:{}}; render() },"d"); render()}
@@ -408,7 +426,7 @@ let renderDisplay=()=>{};
     if(range==="a")return[[A]]; if(range==="b")return[[B]]; if(range==="both")return[[A,B]]; if(range==="span")return[[A],[B]];
     const t=today(); return [[(t.y===dY&&t.m===dM&&t.d>15)?B:A]];
   }
-  function render(){ if(dY==null||$("display").hidden)return; const st=$("stage");st.innerHTML="";
+  function render(){ if(dY==null||$("display").hidden)return; updateNav(); const st=$("stage");st.innerHTML="";
     slots().forEach(group=>{const sl=document.createElement("div");sl.className="slot";const inner=document.createElement("div");inner.className="inner";
       group.forEach(([a,b])=>inner.appendChild(board(a,b)));sl.appendChild(inner);st.appendChild(sl)}); fitTexts(); fit() }
   /* 글씨가 칸을 넘치면: 한 줄에서 조금 줄여 보고, 그래도 넘치면 두세 줄로 나누며 칸 높이에 맞을 때까지 줄임 */
@@ -425,12 +443,52 @@ let renderDisplay=()=>{};
   function fit(){ document.querySelectorAll("#stage .slot").forEach(sl=>{const inner=sl.firstChild,n=inner.children.length||1,W=1600*n+40*(n-1),H=900,
     s=Math.min(sl.clientWidth/W,sl.clientHeight/H)*.97; inner.style.width=W+"px";inner.style.height=H+"px";inner.style.transform=`translate(-50%,-50%) scale(${s})`}) }
   addEventListener("resize",fit);
-  let idle; const wake=()=>{$("toolbar").classList.remove("idle");clearTimeout(idle);idle=setTimeout(()=>{if(!$("display").hidden&&$("view-panel").hidden)$("toolbar").classList.add("idle")},4000)};
+  let idle; const wake=()=>{$("toolbar").classList.remove("idle");$("display").classList.add("awake");clearTimeout(idle);idle=setTimeout(()=>{if(!$("display").hidden&&$("view-panel").hidden){$("toolbar").classList.add("idle");$("display").classList.remove("awake")}},4000)};
   ["mousemove","touchstart","keydown"].forEach(ev=>addEventListener(ev,wake,{passive:true})); wake();
   $("d-prev").onclick=()=>{let y=dY,m=dM-1;if(m<1){m=12;y--}setMonth(y,m)};
   $("d-next").onclick=()=>{let y=dY,m=dM+1;if(m>12){m=1;y++}setMonth(y,m)};
-  $("d-now").onclick=()=>{const t=today();setMonth(t.y,t.m)};
-  $("d-full").onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch(e){}};
+  $("d-now").onclick=()=>{const t=today();setRange("auto");setMonth(t.y,t.m)};
+  /* ---- 페이지 넘기기 ---- */
+  const curHalf=()=>{ if(range==="a"||range==="b") return range; const t=today(); return (t.y===dY&&t.m===dM&&t.d>15)?"b":"a" };
+  function page(dir){ // dir: +1 다음, -1 앞
+    if(range==="both"||range==="span"){ (dir>0?$("d-next"):$("d-prev")).click(); return }
+    const h=curHalf();
+    if(dir>0){ if(h==="a") setRange("b"); else { let y=dY,m=dM+1;if(m>12){m=1;y++} setRange("a"); setMonth(y,m) } }
+    else     { if(h==="b") setRange("a"); else { let y=dY,m=dM-1;if(m<1){m=12;y--} setRange("b"); setMonth(y,m) } }
+  }
+  $("edge-prev").onclick=()=>{page(-1);restartRotate()}; $("edge-next").onclick=()=>{page(1);restartRotate()};
+  addEventListener("keydown",e=>{
+    if($("display").hidden||e.target.closest&&e.target.closest("input,select,textarea")) return;
+    if(["ArrowRight","PageDown"," ","ArrowDown"].includes(e.key)){e.preventDefault();page(1);restartRotate()}
+    else if(["ArrowLeft","PageUp","ArrowUp"].includes(e.key)){e.preventDefault();page(-1);restartRotate()}
+  });
+  function updateNav(){
+    const single=range!=="both"&&range!=="span";
+    $("edge-prev").hidden=!single; $("edge-next").hidden=!single;
+  }
+  /* ---- 자동 넘김 (창마다 따로 기억) ---- */
+  const rotKey="mp:rotate"+(hashRange()?"-win":"");
+  let rotSec=+(ls.get(rotKey)||0), rotTimer=null;
+  function restartRotate(){ clearInterval(rotTimer); rotTimer=null;
+    if(rotSec>0) rotTimer=setInterval(()=>{ if($("display").hidden||range==="both"||range==="span")return; setRange(curHalf()==="a"?"b":"a",false) },rotSec*1000);
+    document.querySelectorAll("#rot button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.sec===rotSec))); }
+  document.querySelectorAll("#rot button").forEach(b=>b.onclick=()=>{rotSec=+b.dataset.sec;ls.set(rotKey,String(rotSec));restartRotate()});
+  restartRotate();
+  /* 전체화면: 표준 방식 + 옛 브라우저(webkit) 방식, 둘 다 안 되면 F11 안내 */
+  const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
+  async function toggleFull(){
+    const de=document.documentElement;
+    try{
+      if(fsEl()){ await (document.exitFullscreen||document.webkitExitFullscreen).call(document); return }
+      const req=de.requestFullscreen||de.webkitRequestFullscreen;
+      if(!req) throw new Error("unsupported");
+      await req.call(de);
+    }catch(e){ showFsHelp() }
+  }
+  function showFsHelp(){ const n=$("notice"); n.textContent="이 브라우저에서는 버튼으로 전체화면을 할 수 없어요. 키보드 F11을 눌러 주세요."; n.hidden=false; setTimeout(()=>n.hidden=true,8000) }
+  function syncFsLabel(){ $("d-full").textContent=fsEl()?"전체화면 끄기":"전체화면" }
+  document.addEventListener("fullscreenchange",syncFsLabel); document.addEventListener("webkitfullscreenchange",syncFsLabel);
+  $("d-full").onclick=toggleFull;
   let lastDay=t0.d; setInterval(()=>{const t=today();if(t.d!==lastDay){lastDay=t.d;setMonth(t.y,t.m)}},60000);
   renderDisplay=render;
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>render()); // 글꼴이 늦게 오면 크기 다시 맞춤
