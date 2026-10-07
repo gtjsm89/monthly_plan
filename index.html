@@ -47,7 +47,7 @@ button,a.btn,a.tb-btn{cursor:pointer;text-decoration:none}
 .slot{flex:1;position:relative;overflow:hidden;min-width:0}
 .slot>.inner{position:absolute;left:50%;top:50%;transform-origin:center center;display:flex;gap:40px}
 .board{width:1600px;height:900px;background:var(--board);border-radius:14px;box-shadow:0 6px 30px rgba(40,50,100,.18);
-  padding:34px 56px 40px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+  padding:34px 56px 26px;display:flex;flex-direction:column;position:relative;overflow:hidden}
 .bhead{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;height:92px;flex:none}
 .btitle{display:flex;align-items:center;gap:18px;color:var(--navy);flex:1;min-width:0;padding-bottom:10px;border-bottom:4px dotted var(--line)}
 .chev{width:56px;height:56px;border-radius:50%;background:var(--navy);display:grid;place-items:center;flex:none}
@@ -58,10 +58,14 @@ button,a.btn,a.tb-btn{cursor:pointer;text-decoration:none}
 .school img{height:56px;width:56px;object-fit:contain;background:#fff;border-radius:50%;padding:3px}
 .school .logo-ph{height:56px;width:56px;border-radius:50%;border:2px dashed rgba(255,255,255,.6)}
 .school span{font:700 40px/1 var(--f-round);letter-spacing:6px;white-space:nowrap}
-.grid{flex:1;display:grid;grid-template-columns:96px 96px 270px 1fr;column-gap:10px;row-gap:6px;margin-top:26px;min-height:0}
+.grid{flex:1;display:grid;grid-template-columns:96px 96px 270px 1fr;column-gap:10px;row-gap:4px;margin-top:18px;min-height:0}
 .grid .h{background:var(--navy);color:#fff;font:700 26px/1 var(--f-body);display:grid;place-items:center;border-radius:3px}
 .grid .c{background:var(--cell);border:1.5px solid var(--line);display:flex;align-items:center;font-size:30px;font-weight:500;
-  padding:0 18px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.15}
+  padding:0 18px;min-width:0;overflow:hidden;white-space:nowrap;line-height:1.15}
+.grid .c>span{display:block;flex:1 1 0;min-width:0;max-width:100%}
+.grid .c.e>span{text-align:center}
+.grid .c.multi{white-space:normal;line-height:1.08;padding-block:1px}
+.grid .c.multi>span{word-break:keep-all;overflow-wrap:anywhere}
 .grid .c.n,.grid .c.w,.grid .c.e{justify-content:center;font-weight:700}
 .grid .c.e{font-size:28px}
 .grid .c.a{font-family:var(--f-round);font-weight:400}
@@ -70,8 +74,6 @@ button,a.btn,a.tb-btn{cursor:pointer;text-decoration:none}
 .grid .vac{background:var(--vac-bg);color:var(--vac-ink)}
 .grid .evt{background:var(--evt-bg);color:var(--evt-ink)}
 .grid .today{box-shadow:inset 0 0 0 4px var(--today)}
-.grid .a.long{font-size:26px}
-.grid .a.xlong{font-size:22px;white-space:normal;line-height:1.1}
 #toolbar{position:fixed;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(255,255,255,.95);
   border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:0 4px 18px rgba(40,50,100,.2);transition:opacity .4s;max-width:calc(100vw - 32px)}
 #toolbar.idle{opacity:0;pointer-events:none}
@@ -337,7 +339,9 @@ let schedule={items:[]};  // 학사일정: {id,name,kind:"off"|"vac"|"evt",start
 function itemsOn(y,m,d){const ds=`${key(y,m)}-${pad(d)}`;return (schedule.items||[]).filter(it=>it.start&&it.start<=ds&&ds<=(it.end||it.start))}
 function dayInfo(y,m,d,data){
   const w=new Date(y,m-1,d).getDay(); const manual=(data&&data.h)||"";
-  const its=itemsOn(y,m,d); const auto=its.map(i=>i.name).filter(Boolean).join(", ");
+  const weekend=w===0||w===6;
+  const its=weekend?[]:itemsOn(y,m,d); // 학사일정 기간은 토·일요일에는 표시하지 않음
+  const auto=its.map(i=>i.name).filter(Boolean).join(", ");
   const off=w===0||HOLI_NAMES.has(manual.trim())||its.some(i=>i.kind==="off");
   let cls=off?"hol":(w===6?"sat":"");
   if(!cls){ if(its.some(i=>i.kind==="vac"))cls="vac"; else if(its.some(i=>i.kind==="evt"))cls="evt"; }
@@ -385,13 +389,13 @@ let renderDisplay=()=>{};
     if(config.logo){const im=document.createElement("img");im.src=config.logo;im.alt="학교 마크";sc.appendChild(im)}
     else{const ph=document.createElement("div");ph.className="logo-ph";sc.appendChild(ph)}
     const nm=document.createElement("span");nm.textContent=config.school||"학교 이름";sc.appendChild(nm);
-    const g=document.createElement("div");g.className="grid";g.style.gridTemplateRows=`52px repeat(${to-from+1},1fr)`;
+    const g=document.createElement("div");g.className="grid";g.style.gridTemplateRows=`46px repeat(${to-from+1},1fr)`;
     ["일","요일","공휴일/행사","교육 활동"].forEach(h=>{const c=document.createElement("div");c.className="h";c.textContent=h;g.appendChild(c)});
     for(let d=from;d<=to;d++){
       const inf=dayInfo(dY,dM,d,data[d]); const isT=t.y===dY&&t.m===dM&&t.d===d;
       [[d,"n"],[inf.wd,"w"],[inf.e,"e"],[inf.a,"a"]].forEach(([txt,c])=>{
-        const el=document.createElement("div");el.className=`c ${c} ${inf.cls}${isT?" today":""}`;el.textContent=txt;
-        if(c==="a"){if(txt.length>58)el.classList.add("xlong");else if(txt.length>46)el.classList.add("long")}
+        const el=document.createElement("div");el.className=`c ${c} ${inf.cls}${isT?" today":""}`;
+        if(c==="a"||c==="e"){const sp=document.createElement("span");sp.textContent=txt;el.appendChild(sp);el.dataset.fit="1"}else el.textContent=txt;
         g.appendChild(el);
       });
     }
@@ -405,7 +409,18 @@ let renderDisplay=()=>{};
   }
   function render(){ if(dY==null||$("display").hidden)return; const st=$("stage");st.innerHTML="";
     slots().forEach(group=>{const sl=document.createElement("div");sl.className="slot";const inner=document.createElement("div");inner.className="inner";
-      group.forEach(([a,b])=>inner.appendChild(board(a,b)));sl.appendChild(inner);st.appendChild(sl)}); fit() }
+      group.forEach(([a,b])=>inner.appendChild(board(a,b)));sl.appendChild(inner);st.appendChild(sl)}); fitTexts(); fit() }
+  /* 글씨가 칸을 넘치면: 한 줄에서 조금 줄여 보고, 그래도 넘치면 두세 줄로 나누며 칸 높이에 맞을 때까지 줄임 */
+  function fitTexts(){
+    document.querySelectorAll('#stage [data-fit]').forEach(el=>{
+      const sp=el.firstChild; if(!sp||!sp.textContent) return;
+      const base=el.classList.contains("e")?28:30, H=el.clientHeight-2;
+      const oneLine=fs=>{el.classList.remove("multi");el.style.fontSize=fs+"px";return sp.scrollWidth<=sp.clientWidth+1&&sp.scrollHeight<=H+2};
+      const lines=fs=>{el.classList.add("multi");el.style.fontSize=fs+"px";return sp.scrollHeight<=H&&sp.scrollWidth<=sp.clientWidth+1};
+      // 한 줄로 22px 이상 들어가면 한 줄, 아니면 두세 줄로 나누고 칸 높이에 맞을 때까지 줄임
+      for(let fs=base;fs>=11;fs--){ if(fs>=22&&oneLine(fs))return; if(fs<=26&&lines(fs))return; }
+    });
+  }
   function fit(){ document.querySelectorAll("#stage .slot").forEach(sl=>{const inner=sl.firstChild,n=inner.children.length||1,W=1600*n+40*(n-1),H=900,
     s=Math.min(sl.clientWidth/W,sl.clientHeight/H)*.97; inner.style.width=W+"px";inner.style.height=H+"px";inner.style.transform=`translate(-50%,-50%) scale(${s})`}) }
   addEventListener("resize",fit);
@@ -417,6 +432,7 @@ let renderDisplay=()=>{};
   $("d-full").onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch(e){}};
   let lastDay=t0.d; setInterval(()=>{const t=today();if(t.d!==lastDay){lastDay=t.d;setMonth(t.y,t.m)}},60000);
   renderDisplay=render;
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>render()); // 글꼴이 늦게 오면 크기 다시 맞춤
   setMonth(t0.y,t0.m);
 }
 
