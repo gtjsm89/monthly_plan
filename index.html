@@ -14,8 +14,8 @@
      ============================================================ -->
 <script>
 window.PLAN_CONFIG = {
-  supabaseUrl: "https://bgkjzbhctnsmqdrahbek.supabase.co/rest/v1/",
-  supabaseAnonKey: "sb_publishable_PNBMpamsjIZbZdDOnS8DEA__T6dhEcr"
+  supabaseUrl: "",
+  supabaseAnonKey: ""
 };
 </script>
 
@@ -58,16 +58,20 @@ button,a.btn,a.tb-btn{cursor:pointer;text-decoration:none}
 .school img{height:56px;width:56px;object-fit:contain;background:#fff;border-radius:50%;padding:3px}
 .school .logo-ph{height:56px;width:56px;border-radius:50%;border:2px dashed rgba(255,255,255,.6)}
 .school span{font:700 40px/1 var(--f-round);letter-spacing:6px;white-space:nowrap}
-.grid{flex:1;display:grid;grid-template-columns:96px 96px 270px 1fr;column-gap:10px;row-gap:4px;margin-top:18px;min-height:0}
+.grid{flex:1;display:grid;grid-template-columns:96px 96px 1fr;column-gap:10px;row-gap:4px;margin-top:18px;min-height:0}
 .grid .h{background:var(--navy);color:#fff;font:700 26px/1 var(--f-body);display:grid;place-items:center;border-radius:3px}
 .grid .c{background:var(--cell);border:1.5px solid var(--line);display:flex;align-items:center;font-size:30px;font-weight:500;
   padding:0 18px;min-width:0;overflow:hidden;white-space:nowrap;line-height:1.15}
 .grid .c>span{display:block;flex:1 1 0;min-width:0;max-width:100%}
-.grid .c.e>span{text-align:center}
+.grid .line{display:block;line-height:1.12;white-space:nowrap}
+.grid .c.multi .line{white-space:normal;word-break:keep-all;overflow-wrap:anywhere}
+
+.grid .tag{font-weight:700;margin-right:.45em}
+.grid .sep{font-style:normal;color:var(--muted);margin-right:.45em}
+.grid .tag.hol{color:var(--hol-ink)} .grid .tag.vac{color:var(--vac-ink)} .grid .tag.evt{color:var(--evt-ink)}
 .grid .c.multi{white-space:normal;line-height:1.08;padding-block:1px}
 .grid .c.multi>span{word-break:keep-all;overflow-wrap:anywhere}
-.grid .c.n,.grid .c.w,.grid .c.e{justify-content:center;font-weight:700}
-.grid .c.e{font-size:28px}
+.grid .c.n,.grid .c.w{justify-content:center;font-weight:700}
 .grid .c.a{font-family:var(--f-round);font-weight:400}
 .grid .sat{background:var(--sat-bg);color:var(--sat-ink)}
 .grid .hol{background:var(--hol-bg);color:var(--hol-ink)}
@@ -120,7 +124,44 @@ button,a.btn,a.tb-btn{cursor:pointer;text-decoration:none}
 table.edit{width:100%;border-collapse:collapse;min-width:620px}
 table.edit th{background:var(--navy);color:#fff;font-weight:500;font-size:13px;padding:8px;text-align:left}
 table.edit th:nth-child(1),table.edit th:nth-child(2){text-align:center;width:52px}
-table.edit th:nth-child(3){width:190px}
+table.edit .actin{display:flex;align-items:center;gap:6px}
+table.edit{min-width:1000px}
+table.edit th.f-time{width:150px} table.edit th.f-target{width:130px} table.edit th.f-place{width:140px} table.edit th.f-who{width:110px} table.edit th.ops{width:76px}
+table.edit td.ops{white-space:nowrap;text-align:right}
+table.edit td.ops button{border:1px solid #d5dbef;background:#fff;border-radius:6px;padding:4px 9px;font-size:13px;margin-left:2px}
+table.edit td.ops button.danger{border-color:var(--hol-ink);color:var(--hol-ink)}
+table.edit tr.sub td{border-top:1px dashed #e3e7f4}
+.opts{display:flex;flex-wrap:wrap;gap:8px 18px}
+.opts label{display:flex;gap:6px;align-items:center;font-size:14px;cursor:pointer}
+.opts .grp{font-size:12px;color:var(--muted);width:100%}
+/* PDF(인쇄) */
+#print-root{position:fixed;left:-20000px;top:0;width:720px}
+.doc{font-family:var(--f-body);color:#111;background:#fff;padding:0}
+.doc-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--navy);padding-bottom:6px;margin-bottom:8px}
+.doc-head h1{margin:0;font-size:20px;color:var(--navy-ink)}
+.doc-school{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:var(--navy-ink)}
+.doc-school img{height:30px;width:30px;object-fit:contain}
+.doc table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10.5px}
+.doc th{background:var(--navy);color:#fff;font-weight:700;padding:4px 3px;border:1px solid var(--navy-ink)}
+.doc td{border:1px solid #b9c1de;padding:3px 5px;vertical-align:middle;line-height:1.35;word-break:keep-all;overflow-wrap:anywhere}
+.doc td.n,.doc td.w{text-align:center;font-weight:700}
+.doc td.f{text-align:center}
+.doc tr.sat td.n,.doc tr.sat td.w{color:var(--sat-ink);background:#eef2fc}
+.doc tr.hol td{background:#fbeef0} .doc tr.hol td.n,.doc tr.hol td.w{color:var(--hol-ink)}
+.doc tr.vac td{background:#eef7f1} .doc tr.evt td{background:#fdf8ea}
+.doc .tag{margin-right:6px} .doc .tag.hol{color:var(--hol-ink)} .doc .tag.vac{color:var(--vac-ink)} .doc .tag.evt{color:var(--evt-ink)}
+.doc tr{break-inside:avoid}
+@media print{
+  html,body{background:#fff!important}
+  body.printing>*:not(#print-root){display:none!important}
+  body.printing #print-root{position:static}
+  @page{size:A4 portrait;margin:10mm 10mm}
+  body.printing #print-root{width:auto}
+  .doc thead{display:table-header-group}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+table.edit .tag{flex:none;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:#fff;border:1px solid currentColor;white-space:nowrap}
+table.edit .tag.hol{color:var(--hol-ink)} table.edit .tag.vac{color:var(--vac-ink)} table.edit .tag.evt{color:var(--evt-ink)}
 table.edit td{border-bottom:1px solid #e3e7f4;padding:4px 6px}
 table.edit td.n,table.edit td.w{text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
 table.edit tr.sat td.n,table.edit tr.sat td.w{color:var(--sat-ink)}
@@ -172,6 +213,7 @@ table.sched tr.evt td:first-child{box-shadow:inset 4px 0 #c99a12}
     <button class="tb-btn" id="d-next" aria-label="다음 달">▶</button>
     <button class="tb-btn" id="d-now">이번 달</button>
     <button class="tb-btn" id="d-view" aria-expanded="false">보기 설정</button>
+    <button class="tb-btn" id="d-pdf">PDF 저장</button>
     <button class="tb-btn" id="d-full">전체화면</button>
     <button class="tb-btn primary" id="go-input">내용 입력</button>
   </div>
@@ -233,8 +275,23 @@ table.sched tr.evt td:first-child{box-shadow:inset 4px 0 #c99a12}
     </section>
 
     <section class="card">
+      <h2>화면 표시 설정</h2>
+      <div class="opts">
+        <span class="grp">화면에 보일 이름 (교육 활동 맨 앞에 굵게)</span>
+        <label><input type="checkbox" id="opt-hol"> 공휴일 (개천절, 한글날 등)</label>
+        <label><input type="checkbox" id="opt-sch"> 학사일정 · 학교 지정 휴일과 기간 (방학, 재량휴업일, 교육실습 등)</label>
+        <span class="grp">교육 활동 뒤 괄호 안에 함께 보일 정보 (PDF에는 모두 들어갑니다)</span>
+        <label><input type="checkbox" id="opt-time"> 시간</label>
+        <label><input type="checkbox" id="opt-target"> 대상</label>
+        <label><input type="checkbox" id="opt-place"> 장소</label>
+        <label><input type="checkbox" id="opt-who"> 담당자</label>
+      </div>
+      <p class="hint" style="margin-top:10px">이름을 끄더라도 빨강·초록·노랑 색칠은 그대로 보입니다.</p>
+    </section>
+
+    <section class="card">
       <h2>학사일정 · 학교 지정 휴일과 기간</h2>
-      <p class="hint">재량휴업일, 방학, 캠프처럼 학교가 정한 날짜를 넣으면 해당 날짜에 이름이 자동으로 표시됩니다. 휴일은 빨강, 방학은 초록, 행사 기간은 노랑으로 칠해져요. 아래 날짜별 표에 직접 적은 내용이 있으면 그 내용이 먼저 보입니다.</p>
+      <p class="hint">재량휴업일, 방학, 캠프처럼 학교가 정한 날짜를 넣으면 해당 날짜에 이름이 자동으로 표시됩니다. 휴일은 빨강, 방학은 초록, 행사 기간은 노랑으로 칠해지고, 이름은 교육 활동 맨 앞에 굵게 표시돼요. 토·일요일에는 표시하지 않습니다.</p>
       <div class="presets">빠른 추가
         <button class="chip off" data-name="재량휴업일" data-kind="off">재량휴업일</button>
         <button class="chip off" data-name="개교기념일" data-kind="off">개교기념일</button>
@@ -260,17 +317,17 @@ table.sched tr.evt td:first-child{box-shadow:inset 4px 0 #c99a12}
           <strong id="i-month"></strong>
           <button class="btn" id="i-next" aria-label="다음 달">▶</button>
         </div>
-        <div class="confirm" id="hol-area"></div>
+        <button class="btn" id="i-pdf">이 달 일정 PDF로 저장</button>
       </div>
       <div class="tablewrap">
         <table class="edit">
-          <thead><tr><th>일</th><th>요일</th><th>공휴일/행사</th><th>교육 활동</th></tr></thead>
+          <thead><tr><th>일</th><th>요일</th><th>교육 활동 내용</th><th class="f-time">시간 <small style="opacity:.7">예) 13:30~15:00</small></th><th class="f-target">대상 <small style="opacity:.7">예) 1~2학년</small></th><th class="f-place">장소</th><th class="f-who">담당자</th><th class="ops"></th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
       </div>
     </section>
 
-    <p class="hint">입력하면 자동으로 저장되고 화면에 바로 반영됩니다. 토요일은 파랑, 일요일·공휴일·학교 지정 휴일은 빨강, 방학은 초록, 행사 기간은 노랑으로 표시됩니다. 공휴일/행사 칸의 흐린 글씨는 학사일정에서 자동으로 들어간 이름이에요.</p>
+    <p class="hint">한 날에 행사가 여러 개면 오른쪽 <b>+</b> 버튼으로 줄을 늘리세요. 입력하면 자동으로 저장되고 화면에 바로 반영됩니다. 토요일은 파랑, 일요일·공휴일·학교 지정 휴일은 빨강, 방학은 초록, 행사 기간은 노랑으로 표시됩니다. 교육 활동 앞의 동그란 이름표는 공휴일과 학사일정에서 자동으로 붙은 것이에요.</p>
   </div>
 </div>
 
@@ -357,14 +414,99 @@ let config={school:"",logo:""}; const months={}; const dirty={};
 let schedule={items:[]};  // 학사일정: {id,name,kind:"off"|"vac"|"evt",start:"YYYY-MM-DD",end}
 function itemsOn(y,m,d){const ds=`${key(y,m)}-${pad(d)}`;return (schedule.items||[]).filter(it=>it.start&&it.start<=ds&&ds<=(it.end||it.start))}
 function dayInfo(y,m,d,data){
-  const w=new Date(y,m-1,d).getDay(); const manual=(data&&data.h)||"";
+  const w=new Date(y,m-1,d).getDay(); const manual=((data&&data.h)||"").trim(); // h: 예전 버전의 공휴일/행사 칸
   const weekend=w===0||w===6;
-  const its=weekend?[]:itemsOn(y,m,d); // 학사일정 기간은 토·일요일에는 표시하지 않음
-  const auto=its.map(i=>i.name).filter(Boolean).join(", ");
-  const off=w===0||HOLI_NAMES.has(manual.trim())||its.some(i=>i.kind==="off");
+  const pub=HOLIDAYS[`${key(y,m)}-${pad(d)}`]||"";       // 공휴일은 목록에서 자동
+  const its=weekend?[]:itemsOn(y,m,d);                   // 학사일정 기간은 토·일요일에는 표시하지 않음
+  const off=w===0||!!pub||HOLI_NAMES.has(manual)||its.some(i=>i.kind==="off");
   let cls=off?"hol":(w===6?"sat":"");
   if(!cls){ if(its.some(i=>i.kind==="vac"))cls="vac"; else if(its.some(i=>i.kind==="evt"))cls="evt"; }
-  return {w,wd:WD[w],e:manual||auto,manual,auto,a:(data&&data.a)||"",cls};
+  const tagCls=it=>it.kind==="off"?"hol":it.kind;
+  const tags=[]; const seen=new Set();
+  const add=(t,c)=>{t=(t||"").trim(); if(t&&!seen.has(t)){seen.add(t);tags.push({t,c})}};
+  if(config.showHoliday!==false){ add(pub,"hol"); add(manual,HOLI_NAMES.has(manual)?"hol":"evt"); }
+  if(config.showSchedule!==false) its.forEach(i=>add(i.name,tagCls(i)));
+  return {w,wd:WD[w],tags,items:dayItems(data),cls};
+}
+/* 하루의 교육 활동 목록: {t:내용, time:시간, target:대상, place:장소, who:담당자}. 예전 버전은 a(글 한 줄) */
+function dayItems(x){ if(!x) return []; if(Array.isArray(x.items)) return x.items; if(x.a) return [{t:x.a}]; return []; }
+const DETAILS=[["time","시간"],["target","대상"],["place","장소"],["who","담당자"]];
+const filled=it=>["t"].concat(DETAILS.map(d=>d[0])).some(f=>String(it[f]||"").trim());
+/* 화면용 한 줄: 내용(시간, 대상, 장소, 담당 ○○) — 설정에서 끈 정보는 빼고 */
+function activityText(it){
+  const parts=DETAILS.filter(([f])=>config["inc_"+f]!==false&&String(it[f]||"").trim()).map(([f])=>f==="who"?"담당 "+it[f].trim():it[f].trim());
+  const t=String(it.t||"").trim();
+  return parts.length?(t?`${t}(${parts.join(", ")})`:parts.join(", ")):t;
+}
+/* 1600×900 게시판 한 장: 일 · 요일 · 교육 활동 */
+function makeBoard(y,m,from,to){
+  const t=today(), data=(months[key(y,m)]||{days:{}}).days||{};
+  const b=document.createElement("div");b.className="board";
+  b.innerHTML=`<div class="bhead"><div class="btitle"><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></div><h1></h1></div><div class="school"></div></div>`;
+  b.querySelector("h1").textContent=`${acadYear(y,m)}학년도 ${m}월 중 교육 추진 계획`;
+  const sc=b.querySelector(".school");
+  if(config.logo){const im=document.createElement("img");im.src=config.logo;im.alt="학교 마크";sc.appendChild(im)}
+  else{const ph=document.createElement("div");ph.className="logo-ph";sc.appendChild(ph)}
+  const nm=document.createElement("span");nm.textContent=config.school||"학교 이름";sc.appendChild(nm);
+  const g=document.createElement("div");g.className="grid";g.style.gridTemplateRows=`46px repeat(${to-from+1},1fr)`;
+  ["일","요일","교육 활동"].forEach(h=>{const c=document.createElement("div");c.className="h";c.textContent=h;g.appendChild(c)});
+  for(let d=from;d<=to;d++){
+    const inf=dayInfo(y,m,d,data[d]), isT=t.y===y&&t.m===m&&t.d===d;
+    const cell=cls=>{const el=document.createElement("div");el.className=`c ${cls} ${inf.cls}${isT?" today":""}`;g.appendChild(el);return el};
+    cell("n").textContent=d; cell("w").textContent=inf.wd;
+    const act=cell("a"), sp=document.createElement("span"), ln=document.createElement("span"); ln.className="line"; act.dataset.fit=d;
+    inf.tags.forEach(tg=>{const b=document.createElement("b");b.className="tag "+tg.c;b.textContent=tg.t;ln.appendChild(b)});
+    const txt=inf.items.filter(filled).map(activityText).filter(Boolean).join(", ");
+    if(inf.tags.length&&txt){const dot=document.createElement("i");dot.className="sep";dot.textContent="·";ln.appendChild(dot)}
+    ln.appendChild(document.createTextNode(txt)); sp.appendChild(ln); act.appendChild(sp);
+  }
+  b.appendChild(g); return b;
+}
+/* 글씨 크기 맞추기: 한 줄로 22px 이상 들어가면 한 줄, 아니면 줄바꿈하며 칸 높이에 맞을 때까지 줄임 */
+function fitBoard(root){
+  root.querySelectorAll("[data-fit]").forEach(el=>{
+    const sp=el.firstChild; if(!sp||!sp.textContent.trim()) return;
+    const H=el.clientHeight-2, ok=()=>sp.scrollWidth<=sp.clientWidth+1&&sp.scrollHeight<=H+1;
+    for(let fs=30;fs>=11;fs--){ el.style.fontSize=fs+"px";
+      if(fs>=22){el.classList.remove("multi"); if(ok())return;}
+      if(fs<=26){el.classList.add("multi"); if(ok())return;} }
+  });
+}
+/* 월별 일정 PDF: A4 세로 문서 (모든 칸 포함) → 인쇄 창에서 'PDF로 저장' */
+function printMonth(y,m){
+  document.getElementById("print-root")?.remove();
+  const data=(months[key(y,m)]||{days:{}}).days||{};
+  const root=document.createElement("div");root.id="print-root";
+  const doc=document.createElement("div");doc.className="doc";
+  const head=document.createElement("div");head.className="doc-head";
+  const h1=document.createElement("h1");h1.textContent=`${acadYear(y,m)}학년도 ${m}월 교육 추진 계획`;
+  const sch=document.createElement("div");sch.className="doc-school";
+  if(config.logo){const im=document.createElement("img");im.src=config.logo;im.alt="";sch.appendChild(im)}
+  sch.appendChild(document.createTextNode(config.school||""));
+  head.append(h1,sch); doc.appendChild(head);
+  const tb=document.createElement("table");
+  tb.innerHTML=`<colgroup><col style="width:5%"><col style="width:5.5%"><col><col style="width:13%"><col style="width:11%"><col style="width:13%"><col style="width:10.5%"></colgroup>
+    <thead><tr><th>일</th><th>요일</th><th>교육 활동</th><th>시간</th><th>대상</th><th>장소</th><th>담당자</th></tr></thead>`;
+  const body=document.createElement("tbody");
+  for(let d=1;d<=dim(y,m);d++){
+    const inf=dayInfo(y,m,d,data[d]), items=inf.items.filter(filled), n=Math.max(1,items.length);
+    for(let i=0;i<n;i++){
+      const it=items[i]||{}, tr=document.createElement("tr"); tr.className=(inf.cls||"")+(i===0?" first":"");
+      if(i===0){ const a=document.createElement("td");a.className="n";a.rowSpan=n;a.textContent=d;
+        const b=document.createElement("td");b.className="w";b.rowSpan=n;b.textContent=inf.wd; tr.append(a,b); }
+      const act=document.createElement("td");act.className="act";
+      if(i===0) inf.tags.forEach(tg=>{const s=document.createElement("b");s.className="tag "+tg.c;s.textContent=tg.t;act.appendChild(s)});
+      act.appendChild(document.createTextNode(it.t||"")); tr.appendChild(act);
+      DETAILS.forEach(([f])=>{const td=document.createElement("td");td.className="f";td.textContent=it[f]||"";tr.appendChild(td)});
+      body.appendChild(tr);
+    }
+  }
+  tb.appendChild(body); doc.appendChild(tb); root.appendChild(doc); document.body.appendChild(root);
+  const oldTitle=document.title; document.title=`${y}년 ${m}월 교육 추진 계획${config.school?" - "+config.school:""}`;
+  document.body.classList.add("printing");
+  const done=()=>{document.body.classList.remove("printing");document.title=oldTitle;root.remove();removeEventListener("afterprint",done)};
+  addEventListener("afterprint",done);
+  setTimeout(()=>{ window.print(); },50);
 }
 
 /* =================== 화면 =================== */
@@ -397,29 +539,9 @@ let renderDisplay=()=>{};
   if(!sb){ $("notice").hidden=false; setTimeout(()=>$("notice").hidden=true,10000) }
   function setMonth(y,m){dY=y;dM=m;$("d-month").textContent=`${y}년 ${m}월`;
     const k=key(y,m); watchDoc("month-"+k,d=>{ if(d!==undefined&&!dirty["month-"+k]) months[k]=d||{days:{}}; render() },"d"); render()}
-  watchDoc("config",d=>{ if(d&&!dirty.config) config={school:d.school||"",logo:d.logo||""}; render() },"d");
+  watchDoc("config",d=>{ if(d&&!dirty.config) config=Object.assign({school:"",logo:""},d); render() },"d");
+  $("d-pdf").onclick=()=>printMonth(dY,dM);
   watchDoc("schedule",d=>{ if(d&&!dirty.schedule) schedule={items:d.items||[]}; render() },"d");
-  function board(from,to){
-    const t=today(); const data=(months[key(dY,dM)]||{days:{}}).days||{};
-    const b=document.createElement("div");b.className="board";
-    b.innerHTML=`<div class="bhead"><div class="btitle"><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></div><h1></h1></div><div class="school"></div></div>`;
-    b.querySelector("h1").textContent=`${acadYear(dY,dM)}학년도 ${dM}월 중 교육 추진 계획`;
-    const sc=b.querySelector(".school");
-    if(config.logo){const im=document.createElement("img");im.src=config.logo;im.alt="학교 마크";sc.appendChild(im)}
-    else{const ph=document.createElement("div");ph.className="logo-ph";sc.appendChild(ph)}
-    const nm=document.createElement("span");nm.textContent=config.school||"학교 이름";sc.appendChild(nm);
-    const g=document.createElement("div");g.className="grid";g.style.gridTemplateRows=`46px repeat(${to-from+1},1fr)`;
-    ["일","요일","공휴일/행사","교육 활동"].forEach(h=>{const c=document.createElement("div");c.className="h";c.textContent=h;g.appendChild(c)});
-    for(let d=from;d<=to;d++){
-      const inf=dayInfo(dY,dM,d,data[d]); const isT=t.y===dY&&t.m===dM&&t.d===d;
-      [[d,"n"],[inf.wd,"w"],[inf.e,"e"],[inf.a,"a"]].forEach(([txt,c])=>{
-        const el=document.createElement("div");el.className=`c ${c} ${inf.cls}${isT?" today":""}`;
-        if(c==="a"||c==="e"){const sp=document.createElement("span");sp.textContent=txt;el.appendChild(sp);el.dataset.fit="1"}else el.textContent=txt;
-        g.appendChild(el);
-      });
-    }
-    b.appendChild(g); return b;
-  }
   // 화면 배치: slots = [[ [시작일,끝일], ... ], ...]  (slot 하나 = 화면 영역 하나)
   function slots(){
     const last=dim(dY,dM), A=[1,15], B=[16,last];
@@ -428,18 +550,7 @@ let renderDisplay=()=>{};
   }
   function render(){ if(dY==null||$("display").hidden)return; updateNav(); const st=$("stage");st.innerHTML="";
     slots().forEach(group=>{const sl=document.createElement("div");sl.className="slot";const inner=document.createElement("div");inner.className="inner";
-      group.forEach(([a,b])=>inner.appendChild(board(a,b)));sl.appendChild(inner);st.appendChild(sl)}); fitTexts(); fit() }
-  /* 글씨가 칸을 넘치면: 한 줄에서 조금 줄여 보고, 그래도 넘치면 두세 줄로 나누며 칸 높이에 맞을 때까지 줄임 */
-  function fitTexts(){
-    document.querySelectorAll('#stage [data-fit]').forEach(el=>{
-      const sp=el.firstChild; if(!sp||!sp.textContent) return;
-      const base=el.classList.contains("e")?28:30, H=el.clientHeight-2;
-      const oneLine=fs=>{el.classList.remove("multi");el.style.fontSize=fs+"px";return sp.scrollWidth<=sp.clientWidth+1&&sp.scrollHeight<=H+2};
-      const lines=fs=>{el.classList.add("multi");el.style.fontSize=fs+"px";return sp.scrollHeight<=H&&sp.scrollWidth<=sp.clientWidth+1};
-      // 한 줄로 22px 이상 들어가면 한 줄, 아니면 두세 줄로 나누고 칸 높이에 맞을 때까지 줄임
-      for(let fs=base;fs>=11;fs--){ if(fs>=22&&oneLine(fs))return; if(fs<=26&&lines(fs))return; }
-    });
-  }
+      group.forEach(([a,b])=>inner.appendChild(makeBoard(dY,dM,a,b)));sl.appendChild(inner);st.appendChild(sl)}); fitBoard(st); fit() }
   function fit(){ document.querySelectorAll("#stage .slot").forEach(sl=>{const inner=sl.firstChild,n=inner.children.length||1,W=1600*n+40*(n-1),H=900,
     s=Math.min(sl.clientWidth/W,sl.clientHeight/H)*.97; inner.style.width=W+"px";inner.style.height=H+"px";inner.style.transform=`translate(-50%,-50%) scale(${s})`}) }
   addEventListener("resize",fit);
@@ -520,8 +631,14 @@ let renderInputPage=()=>{};
   const timers={};
   function save(id,getData){dirty[id]=true;status("저장 중…");clearTimeout(timers[id]);timers[id]=setTimeout(()=>flush(id,getData),500)}
 
-  watchDoc("config",d=>{ if(d&&!dirty.config){config={school:d.school||"",logo:d.logo||""};
-    if(document.activeElement!==$("school-name"))$("school-name").value=config.school; renderLogo()} },"i");
+  watchDoc("config",d=>{ if(d&&!dirty.config){config=Object.assign({school:"",logo:""},d);
+    if(document.activeElement!==$("school-name"))$("school-name").value=config.school; renderLogo(); renderOpts(); render()} },"i");
+  /* 화면 표시 설정 */
+  const OPT_MAP={"opt-hol":"showHoliday","opt-sch":"showSchedule","opt-time":"inc_time","opt-target":"inc_target","opt-place":"inc_place","opt-who":"inc_who"};
+  function renderOpts(){ Object.entries(OPT_MAP).forEach(([id,k])=>$(id).checked=config[k]!==false) }
+  Object.entries(OPT_MAP).forEach(([id,k])=>$(id).onchange=()=>{config[k]=$(id).checked;save("config",()=>config);render();renderDisplay()});
+  renderOpts();
+  $("i-pdf").onclick=()=>printMonth(iY,iM);
   $("school-name").addEventListener("input",e=>{config.school=e.target.value;save("config",()=>config)});
   $("logo-pick").onclick=()=>$("logo-file").click();
   $("logo-clear").onclick=()=>{config.logo="";renderLogo();save("config",()=>config)};
@@ -536,41 +653,62 @@ let renderInputPage=()=>{};
   function renderLogo(){const p=$("logo-prev");p.innerHTML="";if(config.logo){const i=document.createElement("img");i.src=config.logo;i.alt="학교 마크";p.appendChild(i)}else p.textContent="마크 없음"}
 
   const mid=()=>"month-"+key(iY,iM);
-  function setMonth(y,m){iY=y;iM=m;$("i-month").textContent=`${y}년 ${m}월`;resetHol();
+  function setMonth(y,m){iY=y;iM=m;$("i-month").textContent=`${y}년 ${m}월`;
     const k=key(y,m),id="month-"+k; months[k]=months[k]||{days:{}}; render();
     watchDoc(id,d=>{ if(d===undefined||dirty[id])return; months[k]=d||{days:{}}; if(key(iY,iM)===k) softRender() },"i");
   }
   function softRender(){
     const a=document.activeElement;
     if(a&&a.closest&&a.closest("#rows")){const data=months[key(iY,iM)].days||{};
-      document.querySelectorAll("#rows input").forEach(inp=>{if(inp!==a){const x=data[inp.dataset.d];inp.value=(x&&x[inp.dataset.f])||""}});return}
+      document.querySelectorAll("#rows input").forEach(inp=>{if(inp!==a){const it=dayItems(data[inp.dataset.d])[+inp.dataset.i];inp.value=(it&&it[inp.dataset.f])||""}});return}
     render();
   }
   function render(){
     const k=key(iY,iM),data=(months[k].days=months[k].days||{}),tb=$("rows");tb.innerHTML="";
+    // 예전 버전의 '공휴일/행사' 칸 내용 옮기기: 공휴일 이름이면 지우고(자동 표시됨), 그 밖의 글은 교육 활동 앞에 붙임
+    let moved=false;
+    Object.keys(data).forEach(d=>{const x=data[d]; if(!x||!x.h) return; const h=x.h.trim(), pub=HOLIDAYS[`${k}-${pad(+d)}`]||"";
+      if(h&&h!==pub) x.a=x.a?`${h}, ${x.a}`:h; delete x.h; moved=true; if(!x.a) delete data[d]; });
+    // 예전 버전의 한 줄 글(a)을 행사 목록(items)으로 바꾸기
+    Object.keys(data).forEach(d=>{const x=data[d]; if(x&&x.a!==undefined&&!x.items){ if(x.a) x.items=[{t:x.a,time:"",target:"",place:"",who:""}]; delete x.a; moved=true; if(!x.items) delete data[d]; }});
+    if(moved) save("month-"+k,()=>cleanMonth(months[k]));
     for(let d=1;d<=dim(iY,iM);d++){
-      const inf=dayInfo(iY,iM,d,data[d]),tr=document.createElement("tr");tr.className=(inf.cls||"")+(d===16?" half":"");
-      tr.innerHTML=`<td class="n">${d}</td><td class="w">${inf.wd}</td><td><input id="h-${d}" data-d="${d}" data-f="h" aria-label="${d}일 공휴일/행사"></td><td><input id="a-${d}" data-d="${d}" data-f="a" aria-label="${d}일 교육 활동"></td>`;
-      const hi=tr.querySelector("[data-f=h]");hi.value=inf.manual;hi.placeholder=inf.auto;tr.querySelector("[data-f=a]").value=inf.a;tb.appendChild(tr);
+      const inf=dayInfo(iY,iM,d,data[d]), items=inf.items, n=Math.max(1,items.length);
+      for(let i=0;i<n;i++){
+        const it=items[i]||{}, tr=document.createElement("tr");
+        tr.className=(inf.cls||"")+(d===16&&i===0?" half":"")+(i>0?" sub":"");
+        const head=i===0?`<td class="n" rowspan="${n}">${d}</td><td class="w" rowspan="${n}">${inf.wd}</td>`:"";
+        const inp=(f,ph,lab)=>`<input id="${f}-${d}-${i}" data-d="${d}" data-i="${i}" data-f="${f}" placeholder="${ph}" aria-label="${d}일 ${lab}">`;
+        const ops=(i===n-1?`<button data-add="${d}" title="행사 줄 추가" aria-label="${d}일 행사 줄 추가">+</button>`:"")+(n>1?`<button data-del="${d}" data-i="${i}" aria-label="${d}일 ${i+1}번째 줄 지우기">×</button>`:"");
+        tr.innerHTML=`${head}<td class="act"><div class="actin">${inp("t","","교육 활동 내용")}</div></td><td>${inp("time","","시간")}</td><td>${inp("target","","대상")}</td><td>${inp("place","","장소")}</td><td>${inp("who","","담당자")}</td><td class="ops">${ops}</td>`;
+        if(i===0){const act=tr.querySelector(".actin"); inf.tags.slice().reverse().forEach(tg=>{const sp=document.createElement("span");sp.className="tag "+tg.c;sp.textContent=tg.t;act.prepend(sp)})}
+        tr.querySelectorAll("input").forEach(el=>el.value=it[el.dataset.f]||"");
+        tb.appendChild(tr);
+      }
     }
   }
+  const blank=()=>({t:"",time:"",target:"",place:"",who:""});
+  function dayList(d){ const days=months[key(iY,iM)].days; const x=days[d]=days[d]||{}; if(!Array.isArray(x.items)) x.items=dayItems(x).map(it=>Object.assign(blank(),it)); delete x.a; return x.items }
+  // 저장할 때는 빈 줄을 빼고 저장
+  function cleanMonth(mo){ const out={days:{}}; Object.entries(mo.days||{}).forEach(([d,x])=>{
+    const items=dayItems(x).map(it=>({t:it.t||"",time:it.time||"",target:it.target||"",place:it.place||"",who:it.who||""})).filter(it=>Object.values(it).some(v=>v.trim()));
+    if(items.length) out.days[d]={items}; }); return out }
   $("rows").addEventListener("input",e=>{
-    const inp=e.target;if(!inp.dataset.d)return;const k=key(iY,iM),d=inp.dataset.d,f=inp.dataset.f,days=months[k].days;
-    days[d]=Object.assign({h:"",a:""},days[d]);days[d][f]=inp.value;if(!days[d].h&&!days[d].a)delete days[d];
-    if(f==="h"){const inf=dayInfo(iY,iM,+d,days[d]);inp.closest("tr").className=(inf.cls||"")+(+d===16?" half":"")}
-    save("month-"+k,()=>months[k]); renderDisplay();
+    const inp=e.target;if(!inp.dataset.d)return;const k=key(iY,iM),d=inp.dataset.d,i=+inp.dataset.i,f=inp.dataset.f;
+    const list=dayList(d); while(list.length<=i) list.push(blank()); list[i][f]=inp.value;
+    save("month-"+k,()=>cleanMonth(months[k])); renderDisplay();
+  });
+  $("rows").addEventListener("click",e=>{
+    const add=e.target.closest("[data-add]"), del=e.target.closest("[data-del]"); if(!add&&!del) return;
+    const k=key(iY,iM);
+    if(add){ const d=add.dataset.add, list=dayList(d); if(!list.length) list.push(blank()); list.push(blank()); render();
+      $(`t-${d}-${list.length-1}`)?.focus(); return }
+    if(!del.classList.contains("danger")){del.classList.add("danger");del.textContent="지우기";setTimeout(()=>{if(del.isConnected){del.classList.remove("danger");del.textContent="×"}},3000);return}
+    const d=del.dataset.del, list=dayList(d); list.splice(+del.dataset.i,1); render();
+    save("month-"+k,()=>cleanMonth(months[k])); renderDisplay();
   });
   $("i-prev").onclick=()=>{let y=iY,m=iM-1;if(m<1){m=12;y--}setMonth(y,m)};
   $("i-next").onclick=()=>{let y=iY,m=iM+1;if(m>12){m=1;y++}setMonth(y,m)};
-  function resetHol(){$("hol-area").innerHTML='<button class="btn" id="hol-fill">공휴일 자동 채우기</button>';$("hol-fill").onclick=askHol}
-  function askHol(){
-    const k=key(iY,iM),list=Object.keys(HOLIDAYS).filter(x=>x.startsWith(k+"-")),area=$("hol-area");
-    if(!list.length){area.innerHTML="<span>이 달에는 등록된 공휴일 정보가 없습니다.</span>";setTimeout(resetHol,2500);return}
-    area.innerHTML=`<span>${list.length}일의 공휴일/행사 칸을 채울까요? (비어 있는 칸만)</span><button class="btn primary" id="hol-yes">채우기</button><button class="btn ghost" id="hol-no">취소</button>`;
-    $("hol-no").onclick=resetHol;
-    $("hol-yes").onclick=()=>{const days=months[k].days;list.forEach(x=>{const d=String(+x.slice(8));days[d]=Object.assign({h:"",a:""},days[d]);if(!days[d].h)days[d].h=HOLIDAYS[x]});
-      render();save("month-"+k,()=>months[k]);resetHol()};
-  }
   /* ---- 학사일정 ---- */
   const KIND_LABEL={off:"휴일 (빨강)",vac:"방학 (초록)",evt:"행사 기간 (노랑)"};
   const iso=(y,m,d)=>`${y}-${pad(m)}-${pad(d)}`;
